@@ -33,6 +33,7 @@
             cargo-watch
             cargo-whatfeatures
             clang
+            master.git-cliff
             lld
             # Out-of-order intentional for PATH priority
             self.packages."${system}".rust-analyzer
