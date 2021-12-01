@@ -33,10 +33,16 @@
             cargo-watch
             cargo-whatfeatures
             clang
+            master.git-cliff
             lld
             # Out-of-order intentional for PATH priority
             self.packages."${system}".rust-analyzer
-          ] ++ lib.optionals (stdenv.isLinux) [ perf-tools strace valgrind ];
+          ] ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin)
+          (with pkgs.darwin.apple_sdk.frameworks; [
+            CoreServices
+            Security
+            SystemConfiguration
+          ]) ++ lib.optionals (stdenv.isLinux) [ perf-tools strace valgrind ];
       in {
         devShell = pkgs.mkShell {
           nativeBuildInputs = [ pkgs.rust-bin.stable.latest.default ]
