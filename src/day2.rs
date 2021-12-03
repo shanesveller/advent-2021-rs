@@ -62,6 +62,26 @@ impl AddAssign<&Instruction> for Coordinates {
     }
 }
 
+#[derive(Debug, Default)]
+pub struct CoordinatesWithAim {
+    x: usize,
+    y: usize,
+    aim: usize,
+}
+
+impl AddAssign<&Instruction> for CoordinatesWithAim {
+    fn add_assign(&mut self, rhs: &Instruction) {
+        match rhs.0 {
+            Direction::Forward => {
+                self.x += rhs.1;
+                self.y += rhs.1 * self.aim;
+            }
+            Direction::Down => self.aim += rhs.1,
+            Direction::Up => self.aim -= rhs.1,
+        }
+    }
+}
+
 #[aoc_generator(day2)]
 pub fn parse_instructions(input: &str) -> Vec<Instruction> {
     input
@@ -79,4 +99,16 @@ pub fn sum(input: &[Instruction]) -> usize {
     });
 
     final_pos.0 * final_pos.1
+}
+
+#[aoc(day2, part2)]
+pub fn sum_with_aim(input: &[Instruction]) -> usize {
+    let final_pos = input
+        .iter()
+        .fold(CoordinatesWithAim::default(), |mut coord, instr| {
+            coord += instr;
+            coord
+        });
+
+    final_pos.x * final_pos.y
 }
