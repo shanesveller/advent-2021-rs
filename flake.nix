@@ -35,9 +35,8 @@
             clang
             master.git-cliff
             lld
-            # Out-of-order intentional for PATH priority
-            self.packages."${system}".rust-analyzer
-          ] ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin)
+          ] ++ (with self.packages."${system}"; [ cargo-aoc rust-analyzer ])
+          ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin)
           (with pkgs.darwin.apple_sdk.frameworks; [
             CoreServices
             Security
@@ -45,8 +44,8 @@
           ]) ++ lib.optionals (stdenv.isLinux) [ perf-tools strace valgrind ];
       in {
         devShell = pkgs.mkShell {
-          nativeBuildInputs = [ pkgs.rust-bin.stable.latest.default ]
-            ++ sharedInputs;
+          nativeBuildInputs = sharedInputs
+            ++ [ pkgs.rust-bin.stable.latest.default ];
 
           NIX_PATH =
             "nixpkgs=${nixpkgs}:unstable=${inputs.unstable}:master=${inputs.master}";
@@ -54,12 +53,29 @@
         };
 
         packages = {
+          cargo-aoc = let
+            pname = "cargo-aoc";
+            version = "0.3.2";
+          in pkgs.rustPlatform.buildRustPackage {
+            inherit pname version;
+
+            src = pkgs.fetchCrate {
+              inherit pname version;
+              sha256 = "sha256-4XgaYPfywFBRuuKZoQBl2uifAWvwfeneN1gwCa2vVaQ=";
+            };
+
+            cargoSha256 = "sha256-EOS61yuMzFloNOojd5DaVWclcHeF631P7guvbfx6RE0=";
+
+            nativeBuildInputs = [ pkgs.pkg-config ];
+            buildInputs = [ pkgs.openssl.dev ];
+          };
+
           gcroot = pkgs.linkFarmFromDrvs "advent"
             (with self.outputs; [ devShell."${system}".inputDerivation ]);
 
           nightlyDevShell = pkgs.mkShell {
-            nativeBuildInputs = [ pkgs.rust-bin.nightly.latest.default ]
-              ++ sharedInputs;
+            nativeBuildInputs = sharedInputs
+              ++ [ pkgs.rust-bin.nightly.latest.default ];
             RUSTFLAGS = "-Z macro-backtrace";
           };
 
