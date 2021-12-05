@@ -11,11 +11,11 @@ pub enum Direction {
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("Bad direction")]
-    BadDirection,
+    Direction,
     #[error("Bad magnitude")]
-    BadMagnitude,
+    Magnitude,
     #[error("Malformed instruction")]
-    BadInstruction,
+    Instruction,
 }
 
 impl FromStr for Direction {
@@ -26,7 +26,7 @@ impl FromStr for Direction {
             "forward" => Ok(Self::Forward),
             "up" => Ok(Self::Up),
             "down" => Ok(Self::Down),
-            _ => Err(Self::Err::BadDirection),
+            _ => Err(Self::Err::Direction),
         }
     }
 }
@@ -38,13 +38,13 @@ impl FromStr for Instruction {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match &s.split_ascii_whitespace().collect::<Vec<&str>>()[..] {
-            &[dir, mag] => {
+        match s.split_ascii_whitespace().collect::<Vec<&str>>()[..] {
+            [dir, mag] => {
                 let direction = Direction::from_str(dir)?;
-                let magnitude = str::parse::<usize>(mag).map_err(|_| Self::Err::BadMagnitude)?;
+                let magnitude = str::parse::<usize>(mag).map_err(|_| Self::Err::Magnitude)?;
                 Ok(Self(direction, magnitude))
             }
-            _ => Err(Self::Err::BadInstruction),
+            _ => Err(Self::Err::Instruction),
         }
     }
 }

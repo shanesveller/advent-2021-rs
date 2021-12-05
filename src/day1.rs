@@ -11,8 +11,8 @@ pub fn input_generator(input: &str) -> Vec<usize> {
 
 #[aoc(day1, part1)]
 pub fn windows(input: &[usize]) -> usize {
-    input.windows(2).fold(0, |sum, pair| match pair {
-        &[prev, next] => {
+    input.windows(2).fold(0, |sum, pair| match *pair {
+        [prev, next] => {
             if next > prev {
                 sum + 1
             } else {
@@ -26,8 +26,8 @@ pub fn windows(input: &[usize]) -> usize {
 #[aoc(day1, part2)]
 pub fn nested_windows(input: &[usize]) -> usize {
     let triads: Vec<&[usize]> = input.windows(3).collect();
-    triads.windows(2).fold(0, |sum, pair| match pair {
-        &[prev, next] => {
+    triads.windows(2).fold(0, |sum, pair| match *pair {
+        [prev, next] => {
             if prev.iter().sum::<usize>() < next.iter().sum::<usize>() {
                 sum + 1
             } else {

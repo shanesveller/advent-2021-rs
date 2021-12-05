@@ -8,7 +8,7 @@ pub fn parse_input(input: &str) -> (u8, Vec<u16>) {
         .lines()
         .map(|l| u16::from_str_radix(l, 2).unwrap())
         .collect();
-    let width = input.lines().nth(0).unwrap().len();
+    let width = input.lines().next().unwrap().len();
     (width.try_into().unwrap(), inputs)
 }
 
