@@ -141,6 +141,31 @@ fn find_winning_score(input: &(Drawings, Vec<Board>)) -> usize {
     winner.unwrap().score()
 }
 
+#[aoc(day4, part2)]
+fn find_last_winner(input: &(Drawings, Vec<Board>)) -> usize {
+    let mut drawn_boards = input.1.clone();
+
+    let mut winner: Option<Board> = None;
+    let mut winners: HashSet<usize> = HashSet::new();
+
+    for drawing in input.0.iter() {
+        drawn_boards
+            .iter_mut()
+            .enumerate()
+            .for_each(|(idx, board)| {
+                if !winners.contains(&idx) {
+                    board.draw(*drawing);
+                    if board.is_won() {
+                        let _old = winner.insert(board.clone());
+                        winners.insert(idx);
+                    }
+                }
+            });
+    }
+
+    winner.unwrap().score()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
