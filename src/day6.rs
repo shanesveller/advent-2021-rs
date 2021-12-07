@@ -24,16 +24,32 @@ fn input_generator(input: &str) -> Vec<Lanternfish> {
    input.split(',').map(|n| Lanternfish(str::parse::<u8>(n).unwrap())).collect()
 }
 
-#[aoc(day6, part1)]
-fn part1(input: &[Lanternfish]) -> usize {
-    (1..=80).fold((Vec::new(), input.to_vec()), |(mut new, mut current), _day| {
-        for this in current.iter_mut() {
+fn simulate_for_days(mut fish: Vec<Lanternfish>, days: usize) -> Vec<Lanternfish> {
+    assert!(days >= 1);
+    let mut new = Vec::with_capacity(fish.len());
+    (1..=days).for_each(|day| {
+        println!("Simulating day {}", day);
+        for this in fish.iter_mut() {
             if let Some(spawn) = this.age() {
                 new.push(spawn);
             }
         }
 
-        current.append(&mut new);
-        (new, current)
-    }).1.len()
+        fish.append(&mut new);
+    });
+    fish
+}
+
+#[aoc(day6, part1)]
+fn part1(input: &[Lanternfish]) -> usize {
+    let fish = input.to_vec();
+    let total = simulate_for_days(fish, 80);
+    total.len()
+}
+
+#[aoc(day6, part2)]
+fn part2(input: &[Lanternfish]) -> usize {
+    let fish = input.to_vec();
+    let total = simulate_for_days(fish, 256);
+    total.len()
 }
