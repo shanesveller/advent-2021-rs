@@ -67,7 +67,9 @@
             cargoSha256 = "sha256-EOS61yuMzFloNOojd5DaVWclcHeF631P7guvbfx6RE0=";
 
             nativeBuildInputs = [ pkgs.pkg-config ];
-            buildInputs = [ pkgs.openssl.dev ];
+            buildInputs = [ pkgs.openssl.dev ]
+              ++ pkgs.lib.optionals (pkgs.stdenv.isDarwin)
+              (with pkgs.darwin.apple_sdk.frameworks; [ Security ]);
           };
 
           gcroot = pkgs.linkFarmFromDrvs "advent"
