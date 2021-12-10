@@ -50,7 +50,6 @@ fn part2(input: &[Number]) -> u32 {
                 Some(*state)
             })
             .collect();
-        dbg!(&cost_for_distance);
 
         for n in *min..=*max {
             cost = input
