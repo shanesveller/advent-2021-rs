@@ -71,6 +71,7 @@ fn parse_inputs_and_outputs(input: &str) -> IResult<&str, (Vec<Sequence>, Vec<Se
     separated_pair(parse_sequence, tag(" | "), parse_sequence)(input)
 }
 
+#[allow(clippy::type_complexity)]
 fn parse_all_inputs(input: &str) -> IResult<&str, Vec<(Vec<Sequence>, Vec<Sequence>)>> {
     separated_list1(line_ending, parse_inputs_and_outputs)(input)
 }
