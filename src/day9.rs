@@ -1,84 +1,83 @@
 use aoc_runner_derive::{aoc, aoc_generator};
+use std::collections::HashMap;
 
+type Coord = (isize, isize);
 type Number = usize;
 
+#[derive(Debug)]
 struct Input {
-    numbers: Vec<Number>,
-    row_count: isize,
+    grid: HashMap<Coord, Number>,
+    height: isize,
     width: isize,
 }
 
 #[aoc_generator(day9)]
 fn input_parser(input: &str) -> Input {
-    let mut width = 0;
-    let numbers: Vec<Number> = input
+    let grid: HashMap<Coord, Number> = input
         .lines()
-        .flat_map(|l| {
-            width = l.len();
+        .enumerate()
+        .flat_map(|(y, l)| {
             l.chars()
-                .map(|c| c.to_digit(10).unwrap().try_into().unwrap())
-                .collect::<Vec<usize>>()
+                .enumerate()
+                .map(|(x, c)| {
+                    (
+                        (x.try_into().unwrap(), y.try_into().unwrap()),
+                        Number::try_from(c.to_digit(10).unwrap()).unwrap(),
+                    )
+                })
+                .collect::<Vec<(Coord, Number)>>()
         })
         .collect();
-    let row_count: isize = numbers.len().try_into().unwrap();
+
+    let (max_x, max_y) = grid.keys().fold((0, 0), |(old_x, old_y), (x, y)| {
+        (old_x.max(*x), old_y.max(*y))
+    });
 
     Input {
-        numbers,
-        row_count,
-        width: width.try_into().unwrap(),
+        grid,
+        height: max_y + 1,
+        width: max_x + 1,
     }
 }
 
 impl Input {
-    fn adjacent_heights(&self, index: usize) -> Vec<Number> {
+    fn adjacent_cells(&self, x: isize, y: isize) -> Option<Vec<(Coord, Number)>> {
         let offsets: [(isize, isize); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
-        let (x, y) = self.coordinate_for_index(index);
-        offsets
-            .into_iter()
-            .filter_map(|(offset_x, offset_y)| {
-                let new_x = x + offset_x;
-                let new_y = y + offset_y;
-                if new_x >= 0 && new_x <= self.width && new_y >= 0 && new_y <= self.row_count {
-                    Some(self.index_for_coordinate(new_x, new_y).unwrap())
-                } else {
-                    None
-                }
-            })
-            .filter_map(|idx| self.numbers.get::<usize>(idx))
-            .copied()
-            .collect()
+
+        if x >= 0 && x < self.width && y >= 0 && y < self.height {
+            let cells = offsets
+                .into_iter()
+                .filter_map(|(offset_x, offset_y)| {
+                    let new_x = x + offset_x;
+                    let new_y = y + offset_y;
+                    self.height_at_cell(new_x, new_y)
+                        .map(|n| ((new_x, new_y), n))
+                })
+                .collect();
+            Some(cells)
+        } else {
+            None
+        }
     }
 
-    fn coordinate_for_index(&self, index: usize) -> (isize, isize) {
-        (
-            index
-                .rem_euclid(self.width.try_into().unwrap())
-                .try_into()
-                .unwrap(),
-            index
-                .div_euclid(self.width.try_into().unwrap())
-                .try_into()
-                .unwrap(),
-        )
+    fn height_at_cell(&self, x: isize, y: isize) -> Option<Number> {
+        self.grid.get(&(x, y)).copied()
     }
 
-    fn index_for_coordinate(&self, x: isize, y: isize) -> Option<usize> {
-        Some((y * self.width + x).try_into().unwrap())
-    }
-
-    fn is_low_point(&self, index: usize) -> bool {
-        let height = self.numbers[index];
-        self.adjacent_heights(index)
-            .iter()
-            .all(|other| other > &height)
+    fn is_low_point(&self, x: isize, y: isize) -> Option<bool> {
+        self.height_at_cell(x, y).map(|height| {
+            self.adjacent_cells(x, y)
+                .unwrap()
+                .iter()
+                .all(|(_coord, other)| other > &height)
+        })
     }
 
     fn sum_low_points_risk(&self) -> Number {
-        self.numbers
+        self.grid
             .iter()
-            .enumerate()
-            .filter_map(|(idx, n)| {
-                if self.is_low_point(idx) {
+            .filter_map(|((x, y), n)| {
+                if let Some(true) = self.is_low_point(*x, *y) {
                     Some(n + 1)
                 } else {
                     None
