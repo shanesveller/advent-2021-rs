@@ -24,11 +24,8 @@ fn part1(input: &[Number]) -> u32 {
                 .iter()
                 .map(|this| u32::try_from((n as i32 - *this as i32).abs()).unwrap())
                 .sum();
-            match cost.cmp(&lowest_cost) {
-                Ordering::Less => {
-                    lowest_cost = cost;
-                }
-                _ => {}
+            if cost.cmp(&lowest_cost) == Ordering::Less {
+                lowest_cost = cost;
             }
         }
         lowest_cost
